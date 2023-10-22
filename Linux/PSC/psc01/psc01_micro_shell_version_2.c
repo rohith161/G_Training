@@ -16,9 +16,18 @@ int microShellV2(){
     char input[100];
 
     while(1) {
-        printf("%s", "MicroShell] ");
-        fgets(input, sizeof(input), stdin);
-        input[strcspn(input, "\n")] = 0;
+        int byteread = 0;
+        byteread = write(1, "MicroShell] ",strlen("MicroShell] "));
+        if(byteread < 0){
+            perror("write");
+            return errno;
+        }
+        byteread = read(0,input,sizeof(input));
+        if(byteread < 0){
+            perror("read");
+            return errno;
+        }
+        input[byteread-1] = '\0';
 
         if (strcmp(input, "quit") == 0) {
             break;
