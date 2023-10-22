@@ -66,7 +66,7 @@ int codeCompilation() {
 
         waitpid(ret,&status,0); // to check the compiled status from the child process using waitpid()
         
-        if(status == 0){ // if status is 0 menas that the compilation is successful , then execute a.out else compilation error
+        if(status == 0){ // if status is 0 means that the compilation is successful , then execute a.out else compilation error
         int k = execl("./a.out", "./a.out",NULL);
         if (k < 0) {
             perror("execvp");
