@@ -1,10 +1,10 @@
-#include <stdio.h> // for input / ouput functions
-#include <stdlib.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
+#include <stdio.h> // for input / output functions
+#include <stdlib.h> 
+#include <errno.h> // for error message
+#include <fcntl.h> // for flag macros in open
+#include <unistd.h> // for syscall open, write read
+#include <string.h> // for string functions
+#include <sys/wait.h> // for waitpid process to get the status of cjild status
 
 int codeCompilation();
 
@@ -66,7 +66,7 @@ int codeCompilation() {
 
         waitpid(ret,&status,0); // to check the compiled status from the child process using waitpid()
         
-        if(status == 0){ // if status is 0 menas that the compilation is successful , then execute a.out else compilation error
+        if(status == 0){ // if status is 0 means that the compilation is successful , then execute a.out else compilation error
         int k = execl("./a.out", "./a.out",NULL);
         if (k < 0) {
             perror("execvp");
