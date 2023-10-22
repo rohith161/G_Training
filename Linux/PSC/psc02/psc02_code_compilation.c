@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h> // for input / ouput functions
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -50,9 +50,9 @@ int codeCompilation() {
     }
 
     if (ret == 0) {
-        //printf("\n%s\n", input);
-        close(2);
-        open("/dev/null", O_WRONLY);
+        
+        close(2); // To close the stderr of the file descriptor while compiling the .c file
+        open("/dev/null", O_WRONLY); //  now open the /dev/null to redirect the stderr msg to the null file
         char* args[4];
         args[0] = "gcc";
         args[1] = input;
@@ -60,12 +60,13 @@ int codeCompilation() {
         int k = execvp(args[0], args);
         if (k < 0) {
             perror("execvp");
-            exit(1);
+            return errno;
         }
     } else {
-        waitpid(ret,&status,0);
+
+        waitpid(ret,&status,0); // to check the compiled status from the child process using waitpid()
         
-        if(status == 0){
+        if(status == 0){ // if status is 0 menas that the compilation is successful , then execute a.out else compilation error
         int k = execl("./a.out", "./a.out",NULL);
         if (k < 0) {
             perror("execvp");
