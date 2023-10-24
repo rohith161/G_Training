@@ -6,36 +6,33 @@
 #include <string.h> // for string functions
 #include <sys/wait.h> // for waitpid process to get the status of cjild status
 
-int codeCompilation();
+int codeCompilation(char** argv);
 
-int main() {
-    codeCompilation();
+int main(int argc, char** argv) {
+    if(argc < 2 || argc > 2){
+        errno=EINVAL;
+            perror("Error");
+		    return errno;
+    }
+
+    int len = strlen(argv[1]);
+    
+    
+    if (strstr(argv[1]+len-2, ".c") == NULL && strstr(argv[1]+len-2, ".C") == NULL) {
+        printf("\n \"%s\" is not a \'.c\' File\n",argv[1]);
+        return 0;
+    }
+
+    codeCompilation(argv);
     return 0;
 }
 
-int codeCompilation() {
+int codeCompilation(char** argv) {
     printf("\n\t\t--- Code Compilation ---\n\n\n");  
-    char input[100];
+    
     int status;
-    int byteread = 0;
-    byteread = write(1, "$ ", strlen("$ "));
-    if (byteread < 0) {
-        perror("write");
-        return errno;
-    }
-    byteread = read(0, input, sizeof(input));
-    if (byteread < 0) {
-        perror("read");
-        return errno;
-    }
-    input[byteread-1] = '\0';
-
-    if (strstr(input, ".c") == NULL && strstr(input, ".C") == NULL) {
-        errno = 2;
-        perror("Error");
-        return errno;
-    }
-    int src_fd = open(input,O_RDONLY);
+    
+    int src_fd = open(argv[1],O_RDONLY);
     if(src_fd == -1){
         perror("open");
         close(src_fd);
@@ -55,7 +52,7 @@ int codeCompilation() {
         open("/dev/null", O_WRONLY); //  now open the /dev/null to redirect the stderr msg to the null file
         char* args[4];
         args[0] = "gcc";
-        args[1] = input;
+        args[1] = argv[1];
         args[2] = NULL;
         int k = execvp(args[0], args);
         if (k < 0) {

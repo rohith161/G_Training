@@ -10,14 +10,6 @@ int extractLines(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
-    
-    extractLines(argc,argv);
-
-	return 0;
-}
-
-int extractLines(int argc, char** argv){
-    
     if(argc < 3 || argc > 3)
 	{
         errno=EINVAL;
@@ -25,7 +17,15 @@ int extractLines(int argc, char** argv){
 		    return errno;
 	}
     
-	int src_fd; 	
+	
+    extractLines(argc,argv);
+
+	return 0;
+}
+
+int extractLines(int argc, char** argv){
+
+    int src_fd; 	
 	src_fd = open(argv[2] , O_RDONLY);
     
 	if(src_fd == -1)
@@ -35,7 +35,6 @@ int extractLines(int argc, char** argv){
 		close(src_fd);
 		return errno;
 	}
-
     int head = 0, tail = 0, count =0;
 
     if(sscanf(argv[1],"-%d,%d",&head,&tail) != 2){
@@ -44,12 +43,15 @@ int extractLines(int argc, char** argv){
 		    return errno;
     }
     //printf("\nh-> %d   t-> %d\n",head,tail);
-    if(head ==0 || tail == 0){
-        return 0;
-    }
-    tail = abs(tail);
     
-    int flag = 0;
+    if(tail < 0 || head < 0){
+        errno=EINVAL;
+            perror("Error");
+		    return errno;
+    }
+    
+    char temp[tail][200];
+    int cnt = tail-1,flag =0;
     int i=0,ret;
     char buff[1024],ch;
 	while(ret = read(src_fd, &ch, 1))
@@ -63,37 +65,36 @@ int extractLines(int argc, char** argv){
         if(ch == '\n'){
             buff[i] = '\0';
             i = 0;
-            if(tail > head){
-                if(flag == 0){
-                    count = head;
-                    flag = 1;
-                }
-                if(count){
-                    printf("%s",buff);
-                    count--;
-                    if(count == 0){
-                        break;
+            if(tail >= head){
+                if(count >= tail){
+                        exit(0);
                     }
-                }
-                continue;
-            }
-            else if(head >= tail){
-                int ptr = abs(head - tail);
-                //printf("\n%d\n",ptr);
-                if(count >= ptr){
-                    //printf("count ->%d ,  %s",count,buff);
+                if(count >= head){
                     printf("%s",buff);
-                    if(count+1 >= head){
-                        break;
-                    }
+                    
                 }
                 
+            }
+            else if(head >= tail){
+                if(count >= head){
+                        break;
+                    }
+                     if(count >= (head - tail)){
+                    strcpy(temp[cnt--],buff);
+                    
+                }
             }
             count++;
         }
         
 		
 	}
+
+    if(head > tail){
+    for(int i=0; i<tail; i++){
+        printf("%s",temp[i]);
+    }
+    }
 	
     close(src_fd);
 

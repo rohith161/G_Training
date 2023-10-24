@@ -1,0 +1,5 @@
+Q1,What is the capital of France?
+Q2,What is the largest mammal?
+Q3,Who wrote "To Kill a Mockingbird"?
+Q4,What is the boiling point of water in Celsius?
+Q5,What is the symbol for the chemical element gold?

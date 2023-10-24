@@ -8,14 +8,13 @@
 #include <sys/types.h>
 
 char dirName[] = "IntermediateFile"; // IntermediateFile folder / directory
-
+int StageCount = 1;
 void makeDirectory();
 int executeCmd(char* cmd,char* fileName);
-int shellExecution(char* cmd);
+int shellExecution(char* cmd,char* stage);
 
 void makeDirectory(){
     int ret = mkdir(dirName,0777);
-    //printf("\ndir -> %d\n",ret);
     return;
 }
 
@@ -26,33 +25,31 @@ int executeCmd(char* cmd,char* fileName){
     if(strcmp(cmd,"cldir") == 0){
 
         snprintf(temp, sizeof(temp), "rm -rf %s",dirName);
-        int ret = shellExecution(temp);
-       // fprintf(stderr,"\n%s\n",strerror(ret));
+        int ret = shellExecution(temp,"cldir");
 
         return 0;
     }
     else if(strcmp(cmd,"Preprocessing") == 0){
         int len = strlen(fileName);
-        //char temp[50];
-        snprintf(temp, sizeof(temp), "gcc -E %s -o ./IntermediateFile/%.*si", fileName, len - 1, fileName);
-        return shellExecution(temp);
+        
+        snprintf(temp, sizeof(temp), "gcc -E %s -o ./%s/%.*si", fileName, dirName,len - 1, fileName);
+        return shellExecution(temp,cmd);
     }
     else if(strcmp(cmd,"Compiling") == 0){
         int len = strlen(fileName);
-        //char temp[50];
-        snprintf(temp, sizeof(temp), "gcc -S %s -o ./IntermediateFile/%.*ss", fileName, len - 1, fileName);
-        return shellExecution(temp);
+        
+        snprintf(temp, sizeof(temp), "gcc -S %s -o ./%s/%.*ss", fileName, dirName,len - 1, fileName);
+        return shellExecution(temp,cmd);
     }
     else if(strcmp(cmd,"Assembling") == 0){
         int len = strlen(fileName);
-        //char temp[50];
-        snprintf(temp, sizeof(temp), "gcc -c %s -o ./IntermediateFile/%.*so", fileName, len - 1, fileName);
-        return shellExecution(temp);
+        snprintf(temp, sizeof(temp), "gcc -c %s -o ./%s/%.*so", fileName, dirName,len - 1, fileName);
+        return shellExecution(temp,cmd);
     }
     else if(strcmp(cmd,"Linking") == 0){
         int len = strlen(fileName);
-        snprintf(temp, sizeof(temp), "gcc ./IntermediateFile/%.*so -o ./IntermediateFile/%.*sout",len-1, fileName, len - 1, fileName);
-        return shellExecution(temp);
+        snprintf(temp, sizeof(temp), "gcc ./%s/%.*so -o ./%s/%.*sout",dirName,len-1, fileName, dirName,len - 1, fileName);
+        return shellExecution(temp,cmd);
     }
     else{
         errno = EINVAL;
@@ -62,7 +59,7 @@ int executeCmd(char* cmd,char* fileName){
 
 }
 
-int shellExecution(char* cmd){
+int shellExecution(char* cmd,char* stage){
         int status = 0;
         int ret = fork();
         if (ret < 0) {
@@ -90,13 +87,22 @@ int shellExecution(char* cmd){
         } 
         else{
             waitpid(ret,&status,0);
-            if(status == 0){ // if status is 0 means that the compilation is successful , then execute a.out else compilation error
-                return status;
+            //sleep(1);
+            if( status == 0){
+                if(strcmp(stage,"cldir") == 0){
+                    return status;
+                }
+                if(status == 0 && StageCount++ <= 4){ // if status is 0 means that the compilation is successful , then execute a.out else compilation error
+                
+                    fprintf(stderr,"Generated...\n");
+                    return status;
+                }
             }
             else{
+               // fprintf(stderr,"\n%s\n",stage);
                 executeCmd("cldir",dirName);
                 makeDirectory();
-                fprintf(stderr,"\n\ncode_comp: Compilation Failed\nClearing the files and Aborting...\n");
+                fprintf(stderr,"\nFailed to generate the %s stage\ncode_comp: Compilation Failed\nClearing the files and Aborting...\n",stage);
                 exit(1);
             }   
             

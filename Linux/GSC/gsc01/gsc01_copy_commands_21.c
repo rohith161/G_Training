@@ -8,6 +8,20 @@ int copyChunkByChunk(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
+
+	if(argc <= 1)		// if the arguments doesn't contain the source and destination target names
+	{
+		fprintf(stderr,"\'%s\' -> not mentioned the \'source\' and \'destination\' target\n",argv[0]);
+		return EINVAL;
+	}
+	
+	else if(argc > 3 || argc < 3)	// To check if the destination target has mentioned 
+	{
+		errno = EINVAL;
+		perror("Error");
+		return EINVAL;
+	}
+
 	copyChunkByChunk(argc,argv);
 	
 	return 0;
@@ -19,18 +33,6 @@ int copyChunkByChunk(int argc, char** argv){
 	int src_fd, dest_fd; 	// fd for source and destination files
 	int retnum; 	 	// To store the return value of the functions
 	char buff[1024];		// character variable
-	
-	if(argc == 1)		// if the arguments doesn't contain the source and destination target names
-	{
-		fprintf(stderr,"\'%s\' -> not mentioned the \'source\' and \'destination\' target\n",argv[0]);
-		return EINVAL;
-	}
-	
-	else if(argc == 2)	// To check if the destination target has mentioned 
-	{
-		fprintf(stderr,"\n\'%s\' source -> missing \'destination\' target\n",argv[1]);
-		return EINVAL;
-	}
 	
 
 	src_fd = open(argv[1] , O_RDONLY);

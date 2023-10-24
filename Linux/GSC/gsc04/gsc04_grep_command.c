@@ -13,46 +13,17 @@ void lowerCase(char* str);
 
 int main(int argc, char** argv)
 {
-    
+    if( argc < 3  || argc > 4){
+        errno=EINVAL;
+            perror("Error");
+		    return errno;
+    }
     grep(argc,argv);
 
 	return 0;
 }
 
 int grep(int argc, char** argv){
-    
-    if(argc == 1)		// if the arguments doesn't contain the source and destination target names
-	{
-        errno=EINVAL;
-            perror("Error");
-		    return errno;
-	}
-    else if(argc == 2)	// To check if the destination target has mentioned 
-	{
-		errno=EINVAL;
-            perror("Error");
-		    return errno;
-	}
-    else if (argc == 3 && argv[1][0] == '-')
-    {
-        errno=EINVAL;
-        perror("Error");
-	    return errno;
-    }
-
-    else if (argc == 4)
-    {
-        if(!(strcmp("-c",argv[1]) == 0 || strcmp(argv[1],"-i") == 0 || strcmp(argv[1],"-ci") == 0 || strcmp(argv[1],"-ic") == 0)){
-		    errno=EINVAL;
-            perror("Error");
-		    return errno;
-        }
-    }
-    else if(argc > 4){
-        errno=EINVAL;
-            perror("Error");
-		    return errno;
-    }
     
 	int src_fd; 	// fd for source files
 	int retnum; 	 	// To store the return value of the functions
@@ -84,12 +55,19 @@ int grep(int argc, char** argv){
 			perror("read");
 			return errno;
 		}
+
+        if(strcmp(argv[1],"-i") == 0 || strcmp(argv[1],"-ci") == 0 || strcmp(argv[1],"-ic") == 0){
+            if(ch >= 'A' && ch <= 'Z'){
+            ch += 32;
+        }
+        }
+
         buff[i++] = ch;
         if(ch == '\n'){
             buff[i] = '\0';
             i = 0;
             if(argc == 3 || strcmp(argv[1],"-i") == 0){
-                //printf("\nyes\n");
+                
                 subSequence(buff,argc,argv);
             }
             else if(argc == 4){
@@ -130,17 +108,12 @@ void subSequence(char* buff,int argc,char** argv){
     }
     else if(argc == 4 && strcmp(argv[1],"-i") == 0){
             //printf("\nyes\n");
-            char tbuff[strlen(buff)],temp[strlen(buff)+rs+rd];
-            int plen = strlen(argv[2]);
-            char pstr[plen];
-            strcpy(pstr,argv[2]);
-            strcpy(tbuff,buff);
-            //printf("\n-->%s\n",tbuff);
-            lowerCase(tbuff);
-            lowerCase(pstr);
-            char *sub = strstr(tbuff, pstr);
+            char temp[strlen(buff)+rs+rd];
+            int plen = strlen(argv[2]) ;   
+            lowerCase(argv[2]);
+            char *sub = strstr(buff, argv[2]);
             if (sub != NULL) {
-                int pos = sub - tbuff;
+                int pos = sub - buff;
                 char temp[blen+rs+rd]; // to accomadte the string coloring format
                 strncpy(temp,buff,pos);
                 temp[pos] = '\0';
@@ -169,9 +142,7 @@ void countSequence(char* buff,int argc,char** argv,int* count){
             }
         }
         else if(strcmp(argv[1],"-ci") == 0 || strcmp(argv[1],"-ic") == 0){
-            char temp[strlen(buff)];
-            strcpy(temp,buff);
-            lowerCase(temp);
+            
             lowerCase(argv[2]);
             char* ret = strstr(buff,argv[2]);
             if(ret != NULL){

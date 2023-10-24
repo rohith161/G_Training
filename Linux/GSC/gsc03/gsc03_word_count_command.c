@@ -7,6 +7,17 @@ int wordCount(int argc, char** argv);
 
 int main(int argc, char** argv){
 	
+	if(argc < 2){
+		fprintf(stderr,"\n%s:missing input file\n",argv[0]);
+		return EINVAL;	
+
+	}
+	else if(argc > 2){
+		errno=EINVAL;
+            perror("Error");
+		    return errno;
+	}
+
 	wordCount(argc,argv);
 	return 0;
 }
@@ -14,11 +25,7 @@ int main(int argc, char** argv){
 
 int wordCount(int argc, char** argv){
 
-	if(argc < 2){
-		fprintf(stderr,"\n%s:missing input file\n",argv[0]);
-		return EINVAL;	
-
-	}
+	
 	int src_fd;
 	int lineCount = 0, wordCount = 0, charCount = 0;
 	int status;
